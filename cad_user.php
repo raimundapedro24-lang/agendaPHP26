@@ -75,6 +75,96 @@
           <!-- /.col -->
         </div>
       </form>
+ <?php
+include('config/conexao.php'); // Inclui a conexão com o banco de dados
+
+// Verifica se o formulário foi submetido via POST
+if (isset($_POST['botao'])) {
+    // Recebe e higieniza os dados do formulário
+    $nome = $_POST['nome'];
+    $email = $_POST['email'];
+    $senha = password_hash($_POST['senha'], PASSWORD_DEFAULT); // Hash seguro da senha
+
+    // Processamento do upload da foto de perfil
+    if (!empty($_FILES['foto']['name'])) {
+        $formatosPermitidos = array("png", "jpg", "jpeg", "gif");
+        $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+
+        // Verifica se a extensão do arquivo é válida
+        if (in_array(strtolower($extensao), $formatosPermitidos)) {
+            $pasta = "img/user/";
+            $temporario = $_FILES['foto']['tmp_name'];
+            $novoNome = uniqid() . ".$extensao"; // Gera nome único
+
+            if (move_uploaded_file($temporario, $pasta . $novoNome)) {
+                // Upload realizado com sucesso
+            } else {
+                echo '<div class="container">
+                        <div class="alert alert-danger alert-dismissible">
+                            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                            <h5><i class="icon fas fa-exclamation-triangle"></i> Erro!</h5>
+                            Não foi possível fazer o upload do arquivo.
+                        </div>
+                    </div>';
+                exit();
+            }
+        } else {
+            echo '<div class="container">
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        <h5><i class="icon fas fa-exclamation-triangle"></i> Formato Inválido!</h5>
+                        Formato de arquivo não permitido.
+                    </div>
+                </div>';
+            exit();
+        }
+    } else {
+        // Foto padrão caso nenhuma tenha sido enviada
+        $novoNome = 'avatar-padrao.png';
+    }
+
+    // Preparação da instrução SQL com bind de parâmetros PDO
+    $cadastro = "INSERT INTO tb_user (foto_user, nome_user, email_user, senha_user) VALUES (:foto, :nome, :email, :senha)";
+
+    try {
+        $result = $conect->prepare($cadastro);
+        $result->bindParam(':nome', $nome, PDO::PARAM_STR);
+        $result->bindParam(':email', $email, PDO::PARAM_STR);
+        $result->bindParam(':senha', $senha, PDO::PARAM_STR);
+        $result->bindParam(':foto', $novoNome, PDO::PARAM_STR);
+        $result->execute();
+        
+        $contar = $result->rowCount();
+        if ($contar > 0) {
+            echo '<div class="container">
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        <h5><i class="icon fas fa-check"></i> OK!</h5>
+                        Dados inseridos com sucesso !!!
+                    </div>
+                </div>';
+        } else {
+            echo '<div class="container">
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        <h5><i class="icon fas fa-times"></i> Erro!</h5>
+                        Dados não inseridos !!!
+                    </div>
+                </div>';
+        }
+    } catch (PDOException $e) {
+        error_log("ERRO DE PDO: " . $e->getMessage());
+        echo '<div class="container">
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-exclamation-triangle"></i> Erro!</h5>
+                    Ocorreu um erro ao tentar inserir os dados.
+                </div>
+            </div>';
+    }
+}
+?>
+
       
      
       <!-- /.social-auth-links -->
