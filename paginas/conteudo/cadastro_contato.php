@@ -68,6 +68,7 @@
                   <button type="submit" name="botao" class="btn btn-primary">Cadastrar Contato</button>
                 </div>
               </form>
+
               <?php
 
                 // Inclui o arquivo de conexão com o banco de dados
@@ -181,25 +182,75 @@
                     </tr>
                   </thead>
                   <tbody>
-                    
-                                      
-                    <tr>
-                      <td>1</td>
-                      <td>Leandro</td>
-                      <td>
-                      85991446498
-                      </td>
-                      <td>
-                      francisco.silva92@prof.ce.gov
-                      </td>
-                      <td>
-                      <div class="btn-group">
-                        <a href="home.php?acao=editar&id=" class="btn btn-success" title="Editar Contato"><i class="fas fa-user-edit"></i></button>
-                        <a href="conteudo/del-contato.php?idDel=" onclick="return confirm('Deseja remover o contato')" class="btn btn-danger" title="Remover Contato"><i class="fas fa-user-times"></i></a>
-                      </div>
-                      </td>
-                    </tr>
-                   
+                    <?php
+                      $select = "SELECT * FROM tb_contatos 
+                                WHERE id_user = :id_user 
+                                ORDER BY id_contatos DESC 
+                                LIMIT 6";
+
+                      try {
+                          $result = $conect->prepare($select);
+                          $cont = 1;
+
+                          $result->bindParam(':id_user', $id_user, PDO::PARAM_INT);
+                          $result->execute();
+
+                          if ($result->rowCount() > 0) {
+
+                              while ($show = $result->fetch(PDO::FETCH_OBJ)) {
+
+                                  $fotoContato = !empty($show->foto_contatos) 
+                                      ? $show->foto_contatos 
+                                      : 'avatar_padrao.png';
+                      ?>         
+                  <tr>
+                    <td ><?php echo $cont++; ?></td>
+                    <td ><?php echo $show->nome_contatos; ?></td>
+                    <td><?php echo $show->fone_contatos; ?></td>
+                    <td><?php echo $show->email_contatos; ?></td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <!-- Botão para editar -->
+                            <a href="home.php?acao=editar&id=<?php echo $show->id_contatos; ?>" 
+                               class="btn btn-success" 
+                               title="Editar Contato">
+                              <i class="fas fa-user-edit"></i>
+                            </a>
+
+                            <!-- Botão para remover -->
+                            <a href="conteudo/del-contato.php?idDel=<?php echo $show->id_contatos; ?>" 
+                               onclick="return confirm('Deseja realmente remover este contato?')" 
+                               class="btn btn-danger" 
+                               title="Remover Contato">
+                              <i class="fas fa-user-times"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                   <?php
+                              } // fecha while
+
+                          } else {
+
+                              echo '<tr>
+                                  <td colspan="6" class="text-center py-3 text-muted">
+                                      <i class="fas fa-info-circle me-1"></i>
+                                      Nenhum contato cadastrado no momento.
+                                  </td>
+                              </tr>';
+
+                          }
+
+                      } catch (PDOException $e) {
+
+                          echo '<tr>
+                              <td colspan="6" class="text-center py-3 text-danger">
+                                  <strong>ERRO DE PDO:</strong> ' . $e->getMessage() . '
+                              </td>
+                          </tr>';
+
+                      }
+                      ?>
                                        
                   </tbody>
                 </table>

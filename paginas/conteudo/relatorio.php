@@ -18,7 +18,7 @@
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <table id="example1" class="table table-bordered table-hover">
+                <table id="example" class="display nowrap" style="width:100%">
                   <thead>
                   <tr>
                     <th>#</th>
@@ -30,16 +30,43 @@
                   </tr>
                   </thead>
                   <tbody>
+                  <?php
+                  // PASSO 1: Seleciona todos os contatos em ordem decrescente
+                  $select = "SELECT * FROM tb_contatos ORDER BY id_contatos DESC";
                   
+                  try {
+                      $result = $conect->prepare($select);
+                      $cont = 1;
+                      $result->execute();
+
+                      // PASSO 2: Verifica se o retorno contém registros
+                      $contar = $result->rowCount();
+                       if ($contar > 0) {
+                      // PASSO 3: Percorre cada objeto de contato retornado
+                      while ($show = $result->FETCH(PDO::FETCH_OBJ)) {
+
+                      
+                  
+                  ?>
                                       
                     <tr>
-                      <td>1</td>
+                      <td><?php echo $cont++;?></td>
                       <td>
-                      <img src="images/">
+                      <?php
+                        // PASSO 4: Checa se a foto cadastrada é o avatar padrão
+                        if ($show->foto_contatos == 'avatar-padrao.png') {
+                            // Exibe a imagem salva na pasta de avatares padrões
+                            echo '<img src="../img/avatar_p/' . $show->foto_contatos . '" alt="' . $show->foto_contatos . '" title="' . $show->foto_contatos . '" style="width: 50px; border-radius: 100%;">';
+                        } else {
+                            // Exibe a imagem enviada pelo usuário na pasta de contatos
+                            echo '<img src="../img/cont/' . $show->foto_contatos . '" alt="' . $show->foto_contatos . '" title="' . $show->foto_contatos . '" style="width: 50px; border-radius: 100%;">';
+                        }
+                        ?>  
+           </td>
                      </td>
-                      <td>Leandro Costa</td>
-                      <td>85991446498</td>
-                      <td>francisco.silva92@prof.ce.gov.br</td>
+                      <td><?php echo $show->nome_contatos;?></td>
+                      <td><?php echo $show->fone_contatos;?></td>
+                      <td><?php echo $show->email_contatos;?></td>
                       
                       <td>
                       <div class="btn-group">
@@ -48,7 +75,16 @@
                       </div>
                       </td>
                     </tr>
+                   <?php
                    
+                     }                                                           
+                  }
+                                        }
+                        
+                     catch (PDOException $e) {
+                        echo '<strong>ERRO DE PDO= </strong>' . $e->getMessage();
+                    }
+                   ?>
                   </tbody>
                   <tfoot>
                   <tr>
@@ -61,9 +97,6 @@
                   </tr>
                   </tfoot>
                 </table>
-                <div class="col-lg-12 d-flex justify-content-center">
-                  <a href="conteudo/relatoriopdf.php?id=<?php echo $id_user;?>" class="btn btn-lg btn-primary">Gerar relatório completo</a>
-                </div>
                 </div>
               <!-- /.card-body -->
             </div>
