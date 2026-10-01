@@ -32,11 +32,14 @@
                   <tbody>
                   <?php
                   // PASSO 1: Seleciona todos os contatos em ordem decrescente
-                  $select = "SELECT * FROM tb_contatos ORDER BY id_contatos DESC";
+                  $select = "SELECT * FROM tb_contatos 
+                                WHERE id_user = :id_user 
+                                ORDER BY id_contatos DESC";
                   
                   try {
                       $result = $conect->prepare($select);
                       $cont = 1;
+                      $result->bindParam(':id_user', $id_user, PDO::PARAM_INT);
                       $result->execute();
 
                       // PASSO 2: Verifica se o retorno contém registros
@@ -71,7 +74,7 @@
                       <td>
                       <div class="btn-group">
                         <a href="home.php?acao=editar&id=<?php echo $show->id_contatos;?>" class="btn btn-success" title="Editar Contato"><i class="fas fa-user-edit"></i></button>
-                        <a href="conteudo/del-contato.php?idDel=<?php echo $show->id_contatos;?>" onclick="return confirm('Deseja remover o contato')" class="btn btn-danger" title="Remover Contato"><i class="fas fa-user-times"></i></a>
+                        <a href="conteudo/del_rell_contato.php?idDelete=<?php echo $show->id_contatos;?>" onclick="return confirm('Deseja remover o contato')" class="btn btn-danger" title="Remover Contato"><i class="fas fa-user-times"></i></a>
                       </div>
                       </td>
                     </tr>

@@ -35,7 +35,7 @@ if (isset($_GET['idDelete'])) {
                 $result->execute();
 
                 // 5. Redirecionamento após o sucesso
-                header("Location:../home.php?acao=relatorio");
+                header("Location: perfil.php");
 
             } catch (PDOException $e) {
                 echo "<strong>ERRO DE DELETE: </strong>" . $e->getMessage();
